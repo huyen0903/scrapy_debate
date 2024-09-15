@@ -6,13 +6,21 @@ Dự án này là một hệ thống tự động được thiết kế để cr
 Mục tiêu của hệ thống là tự động hóa quá trình lấy dữ liệu từ các nguồn khác nhau mà không cần sự can thiệp thủ công. Hệ thống có khả năng tích hợp với nhiều loại cơ sở dữ liệu khác nhau, giúp việc quản lý dữ liệu trở nên đơn giản và hiệu quả hơn.
 
 # Kiến Trúc Hệ Thống
+
 Hệ thống bao gồm các thành phần chính sau:
+
 **Web Data (Nguồn dữ liệu từ web):** Dữ liệu được lấy từ các nguồn web cụ thể.
+
 **Crawler Application:** Ứng dụng crawler tự động lấy dữ liệu từ các trang web mục tiêu.
+
 **MongoDB Server:** Dữ liệu thu thập từ Crawler sẽ được lưu vào MongoDB để xử lý bước đầu.
+
 **Spark Server:** Xử lý và phân tích và làm sạch dữ liệu với Apache Spark.
+
 **Postgres Server:** Sau khi được Spark xử lý, dữ liệu sẽ được lưu trữ vào Postgres để lưu trữ dạng quan hệ.
+
 **PowerBI App:** Ứng dụng Power BI giúp trực quan hóa dữ liệu và tạo ra các báo cáo trực quan.
+
 ## Cách Hoạt Động
 1. **Dữ liệu được lấy từ các trang web qua Crawler App.**
 2. **Sau khi thu thập, dữ liệu được lưu tạm thời vào MongoDB.**
