@@ -15,8 +15,8 @@ from pyspark.ml.feature import NGram, Tokenizer, StopWordsRemover
 # Initialize Spark session with MongoDB and PostgreSQL connectors
 spark = SparkSession.builder \
 .appName("Chuyển đổi MongoDB sang PostgreSQL") \
-.config("spark.mongodb.input.uri", "mongodb://mongodb:27017/chothuenha_db") \
-.config("spark.mongodb.input.collection", "chothuenha") \
+.config("spark.mongodb.input.uri", "mongodb://mongodb:27017/debate_db") \
+.config("spark.mongodb.input.collection", "debate") \
 .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1,org.postgresql:postgresql:42.2.24") \
 .getOrCreate()
 

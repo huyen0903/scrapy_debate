@@ -10,7 +10,7 @@ services:
 
   scrapy:
     build: .
-    container_name: chothuenha_crawapp
+    container_name: debate_crawapp
     restart: "no"
     depends_on:
       - mongodb
@@ -18,6 +18,8 @@ services:
       - MONGO_URI=mongodb://mongodb:27017
     networks:
       - app-network
+    volumes:
+      - ".:/app"
 
   pyspark:
     build:

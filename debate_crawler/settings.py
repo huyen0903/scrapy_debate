@@ -1,4 +1,4 @@
-# Scrapy settings for chothuenha_crawler project
+# Scrapy settings for debate_crawler project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "chothuenha_crawler"
+BOT_NAME = "debate_crawler"
 
-SPIDER_MODULES = ["chothuenha_crawler.spiders"]
-NEWSPIDER_MODULE = "chothuenha_crawler.spiders"
+SPIDER_MODULES = ["debate_crawler.spiders"]
+NEWSPIDER_MODULE = "debate_crawler.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "chothuenha_crawler (+http://www.yourdomain.com)"
+#USER_AGENT = "debate_crawler (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "chothuenha_crawler.middlewares.ChothuenhaCrawlerSpiderMiddleware": 543,
+#    "debate_crawler.middlewares.debateCrawlerSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    "chothuenha_crawler.middlewares.ChothuenhaCrawlerDownloaderMiddleware": 543,
+#    "debate_crawler.middlewares.debateCrawlerDownloaderMiddleware": 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "chothuenha_crawler.pipelines.ChothuenhaCrawlerPipeline": 300,
+#    "debate_crawler.pipelines.debateCrawlerPipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -94,5 +94,5 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # Configure item pipelines
 ITEM_PIPELINES = {
-    'chothuenha_crawler.pipelines.MongoDBPipeline': 300,
+    'debate_crawler.pipelines.MongoDBPipeline': 300,
 }

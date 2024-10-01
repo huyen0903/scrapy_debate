@@ -9,8 +9,8 @@ import pymongo
 class MongoDBPipeline:
     def __init__(self):
         self.mongo_uri = 'mongodb://mongodb:27017' # localhost , mongodb
-        self.mongo_db = 'chothuenha_db'
-        self.mongo_collection = 'chothuenha'
+        self.mongo_db = 'debate_db'
+        self.mongo_collection = 'debate'
 
     def open_spider(self, spider):
         self.client = pymongo.MongoClient(self.mongo_uri)
@@ -22,7 +22,7 @@ class MongoDBPipeline:
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
         self.db[self.mongo_collection].update_one(
-            {'Posting_id': adapter['Posting_id']},  # Lọc theo Posting_id
+            {'motion': adapter['motion']},  # Lọc theo motion
             {'$set': dict(item)},  # Cập nhật các trường từ item
             upsert=True  # Chèn mới nếu không tồn tại
         )
