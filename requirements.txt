@@ -9,3 +9,5 @@ pandas
 nltk
 scikit-learn
 sqlalchemy
+scrapy-selenium
+deep-translator

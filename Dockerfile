@@ -29,4 +29,4 @@ COPY . .
 # Expose MongoDB port
 EXPOSE 27017
 EXPOSE 5432
-CMD ["sh", "-c", "sleep 30 && python -m scrapy crawl debate_spider"]
+CMD ["sh", "-c", "sleep 30 && python -m scrapy crawl idebate_spider"]
