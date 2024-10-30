@@ -15,24 +15,103 @@ from pyspark.ml.feature import NGram, Tokenizer, StopWordsRemover
 # Initialize Spark session with MongoDB and PostgreSQL connectors
 from pyspark.sql.functions import to_timestamp, col, trim, date_format, to_date
 from pyspark.sql import functions as F
+from pyspark.sql import types as T
+# from googletrans import Translator
 from deep_translator import GoogleTranslator
+# Initialize Translator
 
-def translate_text(text):
-    translator = GoogleTranslator(source='en', target='vi')  # Translate from English to Vietnamese
-    return translator.translate(text)
+# Define a function to translate text
+# def translate_text(text):
+#     try:
+#         translator = Translator()
+#         return translator.translate(text, src='auto', dest='vi').text
+#     except Exception as e:
+#         return str(e)
+    
 
-def translate_list_of_strings(lst, source_lang="en", target_lang="vi"):
-    translator = GoogleTranslator(source=source_lang, target=target_lang)
-    return [translator.translate(text) for text in lst]
+# translate_udf = udf(lambda x: translate_text(x), StringType())
+# Hàm dịch sử dụng googletrans
+def translate_text(text, target_lang="vi"):
+    # translator = Translator()ư
+    if text:
+        try:
+                # Chia đoạn văn bản thành các câu theo dấu chấm
+            sentences = text.split('.')
+            translated_sentences = []
+            if (sentences):
+                logging.error(f"done translate_text': {str(text)}")
+            else:
+                sentences.append(text)
+            for sentence in sentences:
+                    # Loại bỏ khoảng trắng thừa
+                    sentence = sentence.strip()
+                    if sentence:  # Kiểm tra câu không rỗng
+                        try:
+                            translated = GoogleTranslator(source='auto', target=target_lang).translate(sentence)
+                            translated_sentences.append(translated)
+                        except Exception as e:
+                            logging.error(f"Error during translation of '{sentence}': {str(e)}")
+                            # Nếu có lỗi, thêm câu gốc vào danh sách kết quả
+                            # translated_sentences.append(sentence)
+                            
 
-@F.udf
-def translate_row_udf(lst):
-    return translate_list_of_strings(lst)
+                # Ghép lại các câu đã dịch
+            return '. '.join(translated_sentences)
+        except Exception as e:
+            logging.error(f"Error during: {str(e)}")
+            logging.error(f"Error during text: {str(text)}")
+            return text  # Trường hợp gặp lỗi, trả về nội dung ban đầu
+    else:
+        return ""
+    
+def translate_text_array(arr_text, target_lang="vi"):
+    # translator = Translator()ư
+    if arr_text:
+        try:
+            result= []
+            for text in arr_text:
+                sentences = text.split('.')
+                translated_sentences = []
+                if (sentences):
+                    logging.error(f"done translate_text_array': {str(text)}")
+                else:
+                    sentences.append(text)
+                for sentence in sentences:
+                        # Loại bỏ khoảng trắng thừa
+                        sentence = sentence.strip()
+                        if sentence:  # Kiểm tra câu không rỗng
+                            try:
+                                translated = GoogleTranslator(source='auto', target=target_lang).translate(sentence)
+                                translated_sentences.append(translated)
+                            except Exception as e:
+                                logging.error(f"Error during translation of '{sentence}': {str(e)}")
+                                # Nếu có lỗi, thêm câu gốc vào danh sách kết quả
+                                # translated_sentences.append(sentence)
+                                
+
+                    # Ghép lại các câu đã dịch
+                result.append('. '.join(translated_sentences))
+            return result
+        except Exception as e:
+            logging.error(f"Error during: {str(e)}")
+            logging.error(f"Error during text: {str(text)}")
+            return text  # Trường hợp gặp lỗi, trả về nội dung ban đầu
+    else:
+        return ""
+
+# Tạo UDF để áp dụng hàm dịch vào cột dữ liệu
+translate_udf = udf(lambda x: translate_text(x), StringType())
+translate_udf_array = udf(translate_text_array, ArrayType(StringType()))
+# translate_udf = udf(translate_text, StringType())
 spark = SparkSession.builder \
 .appName("Chuyển đổi MongoDB sang PostgreSQL") \
 .config("spark.mongodb.input.uri", "mongodb://mongodb:27017/debate_db") \
 .config("spark.mongodb.input.collection", "debate") \
 .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1,org.postgresql:postgresql:42.2.24") \
+.config("spark.executor.memory", "8g") \
+.config("spark.driver.memory", "8g") \
+.config("spark.task.maxFailures", "8") \
+.config("spark.python.worker.reuse", "true") \
 .getOrCreate()
 
 logging.debug("Phiên Spark đã được khởi tạo.")
@@ -45,7 +124,7 @@ logging.debug("DataFrame đã được tạo từ MongoDB.")
 
 # Select specific columns
 df = df.select(
-     "motion", "points_for", "points_against", "bibliography", 
+    "motion", "points_for", "points_against", "bibliography", 
     "post_type", "post_date", "describe","topic_name",
 )
 
@@ -154,49 +233,73 @@ house_df = df.select(
     # col("street").alias("street")
 ).distinct()  # Loại bỏ các giá trị trùng lặp
     # Tạo cột index từ 0 trở đi
-translate_udf = udf(translate_text, StringType())
-
-# house_df = house_df.withColumn("index", monotonically_increasing_id())
-# house_df = house_df.withColumn("motion_vi", 
+# translate_udf = udf(translate_text_google, StringType())
+# translate_udf = udf(lambda text: translate_text_google(text), StringType())
+# translate_udf = udf(translate_text_google, StringType())
+house_df = house_df.withColumn("index", monotonically_increasing_id())
+# house_df_vi = house_df.withColumn("motion_vi", 
 #                                translate_udf(house_df["motion"])
 #      )
-# house_df = house_df.withColumn("topic_name_vi",
-#                                translate_udf(house_df["topic_name"])
-#                                )
+# house_df_vi = house_df.withColumn("topic_name_vi", translate_udf(house_df["topic_name"]))  # Replace 'text_column'
+# house_df_vi = house_df.withColumn("post_type_vi", translate_udf(house_df["post_type"]))  # Replace 'text_column'
+# house_df_vi = house_df.withColumn("describe_vi", translate_udf(house_df["describe"]))  # Replace 'text_column'
+# house_df_vi = house_df.select("topic_name","post_type","describe","index").toPandas()
+# house_df_vi = house_df_vi.withColumn("motion_vi", translate_udf(house_df_vi["motion"]))  
 
-# house_df = house_df.withColumn("post_type_vi", translate_udf(house_df["post_type"]))
-# ///////////////////////////////////////
-# house_df = house_df.withColumn("points_for_vi",
-#                                 F.when(house_df.points_for.isNull(), F.array())
-#      .otherwise(translate_row_udf(F.array(house_df.points_for)))
-#                                )
-# house_df = house_df.withColumn("points_against_vi",
-#                                F.when(house_df.points_for.isNull(), F.array())
-#      .otherwise(translate_row_udf(F.array(house_df.points_against)))
-                               
-#                                )
+logging.debug("house_df_vi")
 
-
-# house_df = house_df.withColumn("describe_vi",translate_udf(house_df.describe))
-
-# house_df = house_df.withColumn("formatted_date", )
-# house_df = house_df.withColumn("formatted_date",to_timestamp(trim(regexp_replace("post_date", r"[\s\n]+", " ")), "dd-MM-yyyy") )
 house_df = house_df.withColumn("formatted_date", date_format(to_date(trim(regexp_replace("post_date", r"[\s\n]+", " ")), "MMM dd, yyyy"), "dd-MM-yyyy"))
 
-house_df = house_df.withColumn("formatted_type", trim(house_df["post_type"]))
-
+house_df = house_df.withColumn("motion", trim(house_df["motion"]))
+house_df = house_df.withColumn("topic_name", trim(house_df["topic_name"]))
+house_df = house_df.withColumn("post_type", trim(house_df["post_type"]))
+house_df = house_df.withColumn("post_date", trim(house_df["post_date"]))
+house_df = house_df.withColumn("describe", trim(house_df["describe"]))
+house_df_vi = house_df.select(
+    col("motion").alias("motion"),
+    col("topic_name").alias("topic_name"),
+    col("points_for").alias("points_for"),
+    col("points_against").alias("points_against"),
+    col("bibliography").alias("bibliography"),
+    col("post_type").alias("post_type"),
+    col("post_date").alias("post_date"),
+    col("describe").alias("describe"),
+    col("index").alias("house_index"),
+).distinct()  # Loại bỏ các giá trị trùng lặp
+house_df_vi = house_df_vi.withColumn("motion", translate_udf(house_df_vi["motion"]))  
+# house_df_vi = house_df_vi.withColumn("post_type_vi", translate_udf(house_df_vi["post_type"]))  
+house_df_vi = house_df_vi.withColumn("post_type", translate_udf(house_df_vi["post_type"]))  
+house_df_vi = house_df_vi.withColumn("describe", translate_udf(house_df_vi["describe"]))  
+house_df_vi = house_df_vi.withColumn("topic_name", translate_udf(house_df_vi["topic_name"]))  
+house_df_vi = house_df_vi.withColumn("points_for", translate_udf_array(house_df_vi["points_for"]))  
+house_df_vi = house_df_vi.withColumn("points_against", translate_udf_array(house_df_vi["points_against"]))  
+house_df_vi = house_df_vi.select(
+    col("motion").alias("motion"),
+    col("topic_name").alias("topic_name"),
+    col("points_for").alias("points_for"),
+    col("points_against").alias("points_against"),
+    col("bibliography").alias("bibliography"),
+    col("post_type").alias("post_type"),
+    col("post_date").alias("post_date"),
+    col("describe").alias("describe"),
+    col("house_index").alias("house_index"),
+).distinct()  # Loại bỏ các giá trị trùng lặp
+# house_df_vi = house_df_vi.withColumn("index", monotonically_increasing_id())
 # Tạo cột house_id với định dạng 'WE' và bắt đầu từ 100
-house_df_with_id = house_df.withColumn(
-    "motion_id",
-    concat(lit("P"), (col("index") + 100).cast("string"))
-).drop("index")  # Bỏ cột index nếu không còn cần thiết
-
+# house_df_with_id = house_df.withColumn(
+#     "motion_id",
+#     concat(lit("P"), (col("index") + 100).cast("string"))
+# ).drop("index")  # Bỏ cột index nếu không còn cần thiết
+# house_df_vi = house_df_vi.drop("motion")
+# house_df_vi = house_df_vi.drop("topic_name")
+# house_df_vi = house_df_vi.drop("post_date")
+# house_df_vi = house_df_vi.drop("post_type")
+# house_df_vi = house_df_vi.drop("describe")
 join_columns = ["motion",  "topic_name", "motion", "points_for", "points_against", "bibliography", 
     "post_type", "post_date", "describe"
     # , "formatted_date","formatted_type"
                 # , "num_bedrooms", "num_toilets", "room_area", "city", "district", "ward", "street"
                 ]
-print(house_df)
 # Thực hiện join
 # df = df.join(
 #     house_df_with_id,
@@ -342,8 +445,22 @@ house_df.write \
     .option("driver", "org.postgresql.Driver") \
     .mode("overwrite") \
     .save()
-
-print("done")
+try:
+    house_df_vi.show(truncate=False)
+    logging.error(f"bbbbbbbbbbbbbbbbbbbbbbbbbbb")
+    house_df_vi.write \
+        .format("jdbc") \
+        .option("url", "jdbc:postgresql://postgres_db:5432/process_data") \
+        .option("dbtable", "house_vi") \
+        .option("user", "root") \
+        .option("password", "root") \
+        .option("driver", "org.postgresql.Driver") \
+        .mode("overwrite") \
+        .save()
+    house_df_vi.show(truncate=False)
+    logging.error(f"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+except Exception as e:
+    logging.error(f"Error during saving to PostgreSQL: {str(e)}")
 # new_amenities_df_with_id.write \
 #     .format("jdbc") \
 #     .option("url", "jdbc:postgresql://postgres_db:5432/process_data") \

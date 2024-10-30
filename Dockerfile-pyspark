@@ -13,3 +13,5 @@ RUN pip install pandas
 RUN pip install scikit-learn
 RUN pip install sqlalchemy
 RUN pip install -U deep-translator
+RUN pip install googletrans==4.0.0-rc1
+
