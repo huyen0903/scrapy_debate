@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+    api:
+        build: ./app
+        ports: 
+            - 81:80
+        env_file:
+            - .env
+        volumes:
+            - ./app:/app
+        restart: always
+volumes:
+    taskdb:

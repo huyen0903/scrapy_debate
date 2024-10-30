@@ -1,13 +1,13 @@
 version: '3.12'
 services:
   api:
-        build: ./medihome-dictionary-be/app
+        build: ./api/app
         ports: 
             - 81:80
         env_file:
-            - ./medihome-dictionary-be/.env
+            - ./api/.env
         volumes:
-            - ./medihome-dictionary-be/app:/app
+            - ./api/app:/app
         restart: always
         networks:
           - app-network
