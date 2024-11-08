@@ -65,4 +65,4 @@ Hệ thống bao gồm các thành phần chính sau:
      ```
 ## Kết quả
 Ứng dụng sẽ tự động thu lập tiền xử lý và lưu dữ liệu dựa trên trang web đã cài đặt bằng spider vào các thành phần tương ứng bạn có thể mở xem trên các csdl server cài trên máy với authentication  được setting trên docker-compose (not safe but continue)
-# crapy_khanhhuyen
+# scrapy_khanhhuyen
